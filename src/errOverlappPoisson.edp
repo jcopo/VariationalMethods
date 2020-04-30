@@ -15,7 +15,7 @@ for (i = 0; i < 10; i++) {
     exec("echo " + errL2[i] + ">> errL2Overlapp.txt");
     exec("echo " + errH1[i] + ">> errH1Overlapp.txt");
 }
-exec("mv *.txt ../output/data"); 
+exec("mv *.txt ./output/data"); 
 
 for (i=0;i<10;i++) {
     cout << "Pour n = " << i+1 << " on a: " << errL2[i] << " et " << errH1[i] << endl;

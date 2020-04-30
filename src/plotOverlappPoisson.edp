@@ -8,4 +8,4 @@ for (i = 0; i < 10; i++) {
     plot(U, u, ps = "schwarzOverlappPoisson" + i + ".eps", cmm="Schwarz overlapping Poisson n=" + i);
 }
 
-exec("mv *.eps ../output/graphics/schwarzOverlappPoisson/");
+exec("mv *.eps ./output/graphics/schwarzOverlappPoisson/");

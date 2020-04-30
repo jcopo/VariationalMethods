@@ -12,7 +12,7 @@ for (i = 0; i < 10; i++) {
     errL2[i] = sqrt(int2d(th)(errh^2)) + sqrt(int2d(TH)(errH^2));
     exec("echo " + errL2[i] + ">> errL2NoOverlapp.txt");
 }
-exec("mv *.txt ../output/data"); 
+exec("mv *.txt ./output/data"); 
 
 for (i=0;i<10;i++) {
     cout << "Pour n = " << i+1 << " on a: " << errL2[i] << endl;
