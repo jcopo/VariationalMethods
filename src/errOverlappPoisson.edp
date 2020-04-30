@@ -1,0 +1,22 @@
+include "schwarzOverlappPoisson.edp"
+verbosity = 0;
+
+real[int] errL2(10);
+real[int] errH1(10);
+
+for (i = 0; i < 10; i++) {
+    PB; 
+    pb;
+    vh errh = u-uh;
+    VH errH = U-uH;
+    errL2[i] = sqrt(int2d(th)(errh^2)) + sqrt(int2d(TH)(errH^2));
+    errH1[i] = sqrt(int2d(th)((errh^2)) + int2d(th)(dx(errh)^2) + int2d(th)(dy(errh)^2));
+    errH1[i] = errH1[i] + sqrt(int2d(TH)(errH^2) + int2d(TH)(dx(errH)^2) + int2d(TH)(dy(errH)^2));  
+    exec("echo " + errL2[i] + ">> errL2Overlapp.txt");
+    exec("echo " + errH1[i] + ">> errH1Overlapp.txt");
+}
+exec("mv *.txt ../output/data"); 
+
+for (i=0;i<10;i++) {
+    cout << "Pour n = " << i+1 << " on a: " << errL2[i] << " et " << errH1[i] << endl;
+}

@@ -1,0 +1,22 @@
+include "schwarzNoOverlappPoisson.edp"
+verbosity = 0;
+
+// Erreur No overlapping
+real[int] errL2(10);
+
+for (i = 0; i < 10; i++) {
+    PB;
+    pb;
+    vh errh = u-uh;
+    VH errH = U-uH;
+    errL2[i] = sqrt(int2d(th)(errh^2)) + sqrt(int2d(TH)(errH^2));
+    exec("echo " + errL2[i] + ">> errL2NoOverlapp.txt");
+}
+exec("mv *.txt ../output/data"); 
+
+for (i=0;i<10;i++) {
+    cout << "Pour n = " << i+1 << " on a: " << errL2[i] << endl;
+    
+}
+
+

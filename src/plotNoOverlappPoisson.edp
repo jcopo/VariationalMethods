@@ -1,0 +1,16 @@
+include "schwarzNoOverlappPoisson.edp"
+
+verbosity = 0;
+
+// plot
+
+for (i = 1; i < 10; i++) {
+    PB;
+    pb;
+    vh errh = u-uh;
+    VH errH = U-uH;
+    //lambda = lambda -(u-U)/2;
+    plot(U,u, ps = "schwarzNoOverlappPoisson"+i+".eps", cmm = "Solution Schwarz no Overlapping n="+i);
+}
+
+exec("mv *.eps ../output/graphics/schwarzNoOverlappPoisson/");

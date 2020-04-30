@@ -1,0 +1,69 @@
+
+// Paramètre l
+real l = 0;
+int n = 2;
+int gamma = 1;
+int omega = 2;
+
+// definition des \delta O_2
+border O2bottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = omega;};//cote inferieur 
+border O2right(t=-0.5,0.5) {x = 2; y = t; label = omega;};//cote droit 
+border O2top(t=2,sqrt(3)*0.5) {x = t; y = 0.5; label = omega;};//cote superieur
+
+// definition de \Gamma_2
+border G2left(t=0.5,-0.5){x = l; y = t; label = gamma;} //cote gauche
+border G2top(t=sqrt(3)*0.5,l){x = t; y = 0.5; label = gamma;} //cote superieur
+border G2bottom(t=l,sqrt(3)*0.5){x = t; y = -0.5; label = gamma;}
+
+// definition de \delta O_1
+border O1circle(t=(pi/6),11*(pi/6)){x = cos(t); y = sin(t); label = omega;};
+
+// definition de \Gamma_1
+border G1circle(t=-(pi/6),(pi/6)){x = cos(t); y = sin(t); label = gamma;};
+
+
+// definition de la grille
+mesh TH = buildmesh(O1circle(50*n) + G1circle(10*n));
+mesh th = buildmesh(O2bottom(10*n) + O2right(10*n) + O2top(10*n) + G2left(10*n) + G2bottom(10*n) + G2top(10*n));
+// plot(TH,th, wait=1);
+
+// espace element fini p1
+fespace vh(th, P1);
+vh u=0, v;
+
+fespace VH(TH, P1);
+VH U, V;
+
+// resolution du probleme
+int i = 0;
+
+problem PB(U,V,init=i,solver="Cholesky") =
+    int2d(TH)(dx(U)*dx(V) + dy(U)*dy(V))
+    - int2d(TH)(V)
+    + on(gamma, U=u)
+    + on(omega, U=0);
+
+problem pb(u,v,init=i,solver="Cholesky") =
+    int2d(th)(dx(u)*dx(v) + dy(u)*dy(v))
+    - int2d(th)(v)
+    + on(gamma, u=U)
+    + on(omega, u=0);
+
+// numerical result of (1)
+vh uh, vhT;
+problem internPoissonh(uh,vhT,solver=GMRES,tgv=1e5) = 
+    int2d(th)(dx(uh)*dx(vhT) + dy(uh)*dy(vhT)) 
+    - int2d(th)(vhT) 
+    + on(1,2, uh = 0);
+
+internPoissonh;
+
+VH uH, vH;
+problem internPoissonH(uH,vH,solver=GMRES,tgv=1e5) = 
+    int2d(TH)(dx(uH)*dx(vH) + dy(uH)*dy(vH)) 
+    - int2d(TH)(vH) 
+    + on(1,2, uH = 0);
+
+internPoissonH;
+
+
