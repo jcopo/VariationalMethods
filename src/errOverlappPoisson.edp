@@ -5,7 +5,7 @@ real[int] errL2(10);
 real[int] errH1(10);
 
 for (i = 0; i < 10; i++) {
-    PB; 
+    PB;
     pb;
     vh errh = u-uh;
     VH errH = U-uH;

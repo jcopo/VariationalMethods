@@ -32,7 +32,7 @@ fespace vh(th, P1);
 vh u=0, v;
 
 fespace VH(TH, P1);
-VH U, V;
+VH U=0, V;
 
 // resolution du probleme
 int i = 0;
@@ -54,7 +54,7 @@ vh uh, vhT;
 problem internPoissonh(uh,vhT,solver=GMRES,tgv=1e5) = 
     int2d(th)(dx(uh)*dx(vhT) + dy(uh)*dy(vhT)) 
     - int2d(th)(vhT) 
-    + on(1,2, uh = 0);
+    + on(omega, uh = 0);
 
 internPoissonh;
 
@@ -62,7 +62,7 @@ VH uH, vH;
 problem internPoissonH(uH,vH,solver=GMRES,tgv=1e5) = 
     int2d(TH)(dx(uH)*dx(vH) + dy(uH)*dy(vH)) 
     - int2d(TH)(vH) 
-    + on(1,2, uH = 0);
+    + on(omega, uH = 0);
 
 internPoissonH;
 

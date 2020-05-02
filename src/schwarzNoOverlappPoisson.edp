@@ -1,9 +1,7 @@
-
-// Paramètre l
-real l = 0;
 int n = 2;
 int gamma = 1;
 int omega = 2;
+real lambda = 1;
 
 // definition des \delta O_3
 border O3bottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = omega;};//cote inferieur 
@@ -25,7 +23,7 @@ mesh th = buildmesh(O3bottom(10*n) + O3right(10*n) + O3top(10*n) + G3circle(10*n
 
 // espace element fini p1
 fespace vh(th, P1);
-vh u=0, v, lambda=1;
+vh u=0, v;
 
 fespace VH(TH, P1);
 VH U, V;
@@ -36,28 +34,30 @@ int i = 0;
 problem PB(U,V,init=i,solver="Cholesky") =
     int2d(TH)(dx(U)*dx(V) + dy(U)*dy(V))
     - int2d(TH)(V)
-    + int1d(TH, gamma)(lambda*V)
+    + int1d(TH, gamma)(lambda*V*U)
+    - int1d(TH, gamma)((N.x*dx(u)+ N.y*dy(u) + lambda*u)*V)
     + on(omega, U=0);
 
 problem pb(u,v,init=i,solver="Cholesky") =
     int2d(th)(dx(u)*dx(v) + dy(u)*dy(v))
     - int2d(th)(v)
-    - int1d(th, gamma)(lambda*v)
+    + int1d(th, gamma)(lambda*v*u)
+    - int1d(th, gamma)((N.x*dx(U) + N.y*dy(U) + lambda*U)*v)
     + on(omega, u=0);
 
 // numerical result of (1)
 vh uh, vhT;
-problem internPoissonh(uh,vhT,solver=GMRES,tgv=1e5) = 
+problem internPoissonh(uh,vhT,solver="Cholesky") = 
     int2d(th)(dx(uh)*dx(vhT) + dy(uh)*dy(vhT)) 
     - int2d(th)(vhT) 
-    + on(1,2, uh = 0);
+    + on(omega, uh = 0);
 
 internPoissonh;
 
 VH uH, vH;
-problem internPoissonH(uH,vH,solver=GMRES,tgv=1e5) = 
+problem internPoissonH(uH,vH,solver="Cholesky") = 
     int2d(TH)(dx(uH)*dx(vH) + dy(uH)*dy(vH)) 
     - int2d(TH)(vH) 
-    + on(1,2, uH = 0);
+    + on(omega, uH = 0);
 
 internPoissonH;
