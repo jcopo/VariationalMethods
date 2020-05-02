@@ -1,0 +1,27 @@
+// definition des frontières du rectangle
+border abottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = 3;};//cote inferieur 
+border aright(t=-0.5,0.5) {x = 2; y = t; label = 3;};//cote droit 
+border atop(t=2,sqrt(3)*0.5) {x = t; y = 0.5; label = 3;};//cote superieur
+
+
+// definition du cercle
+border circle(t=(pi/6),11*(pi/6)){x = cos(t); y = sin(t); label = 4;};
+
+mesh Th = buildmesh(abottom(10*n) + aright(10*n) + atop(10*n) + circle(50*n));
+// plot(Th, wait=1);
+
+// Espace element fini p1
+fespace Vh(Th,P1);
+
+// Resolution du probleme avec f=1
+Vh uinth,vinth;
+
+problem internPoisson(uinth,vinth,solver=GMRES,tgv=1e5) = 
+    int2d(Th)(dx(uinth)*dx(vinth) + dy(uinth)*dy(vinth)) 
+    - int2d(Th)(vinth) 
+    + on(3,4, uinth = 0);
+
+internPoisson;
+
+
+

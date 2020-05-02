@@ -1,13 +1,10 @@
 include "schwarzNoOverlappPoisson.edp"
-
 verbosity = 0;
 
 // plot
-
-for (i = 1; i < 10; i++) {
+for (i = 1; i < 2; i++) {
     pb;
     PB;
-    //lambda = lambda -(u-U)/2;
     plot(U,u, ps = "schwarzNoOverlappPoisson"+i+".eps", cmm = "Solution Schwarz no Overlapping n="+i);
 }
 

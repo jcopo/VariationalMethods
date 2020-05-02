@@ -1,0 +1,87 @@
+verbosity = 0;
+int nb = 20;
+real[int] xx(nb);
+real[int] yy(nb);
+
+for (int k = 0; k < nb; k++) {
+    int n = 2;
+    int gamma = 1;
+    int omega = 2;
+    real lambda = real(k*3)/nb;
+
+    // definition des frontières du rectangle
+    border abottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = 3;};//cote inferieur 
+    border aright(t=-0.5,0.5) {x = 2; y = t; label = 3;};//cote droit 
+    border atop(t=2,sqrt(3)*0.5) {x = t; y = 0.5; label = 3;};//cote superieur
+
+
+    // definition du cercle
+    border circle(t=(pi/6),11*(pi/6)){x = cos(t); y = sin(t); label = 4;};
+
+    mesh Th = buildmesh(abottom(10*n) + aright(10*n) + atop(10*n) + circle(50*n));
+    // plot(Th, wait=1);
+
+    // Espace element fini p1
+    fespace Vh(Th,P1);
+
+    // Resolution du probleme avec f=1
+    Vh uinth,vinth;
+
+    problem internPoisson(uinth,vinth,solver=GMRES,tgv=1e5) = 
+        int2d(Th)(dx(uinth)*dx(vinth) + dy(uinth)*dy(vinth)) 
+        - int2d(Th)(vinth) 
+        + on(3,4, uinth = 0);
+
+    // definition des \delta O_3
+    border O3bottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = omega;};//cote inferieur 
+    border O3right(t=-0.5,0.5) {x = 2; y = t; label = omega;};//cote droit 
+    border O3top(t=2,sqrt(3)*0.5) {x = t; y = 0.5; label = omega;};//cote superieur
+
+    // definition de \delta O_1
+    border O1circle(t=(pi/6),11*(pi/6)){x = cos(t); y = sin(t); label = omega;};
+
+    // definition de \Gamma
+    border G1circle(t=-(pi/6),(pi/6)){x = cos(t); y = sin(t); label = gamma;};
+    border G3circle(t=(pi/6),-(pi/6)){x = cos(t); y = sin(t); label = gamma;};
+
+
+    // definition de la grille
+    mesh TH = buildmesh(O1circle(50*n) + G1circle(10*n));
+    mesh th = buildmesh(O3bottom(10*n) + O3right(10*n) + O3top(10*n) + G3circle(10*n));
+    //plot(TH,th, wait=1);
+
+    // espace element fini p1
+    fespace vh(th, P1);
+    vh u=0, v;
+
+    fespace VH(TH, P1);
+    VH U=0, V;
+
+    // resolution du probleme
+    int i = 0;
+
+    problem PB(U,V,init=i,solver="Cholesky") =
+        int2d(TH)(dx(U)*dx(V) + dy(U)*dy(V))
+        - int2d(TH)(V)
+        + int1d(TH, gamma)(lambda*V*U)
+        - int1d(TH, gamma)((N.x*dx(u)+ N.y*dy(u) + lambda*u)*V)
+        + on(omega, U=0);
+
+    problem pb(u,v,init=i,solver="Cholesky") =
+        int2d(th)(dx(u)*dx(v) + dy(u)*dy(v))
+        - int2d(th)(v)
+        + int1d(th, gamma)(lambda*v*u)
+        - int1d(th, gamma)((N.x*dx(U) + N.y*dy(U) + lambda*U)*v)
+        + on(omega, u=0);
+    
+    PB;
+    pb;
+    internPoisson;
+    vh errh = u-uinth;
+    VH errH = U-uinth;
+    yy(k) = sqrt(int2d(th)(errh^2)) + sqrt(int2d(TH)(errH^2));
+    xx(k) = lambda;
+    exec("echo " + yy(k) + ">> lambday.txt");
+    exec("echo " + xx(k) + ">> lambdax.txt");
+}
+exec("mv *.txt ../output/data");

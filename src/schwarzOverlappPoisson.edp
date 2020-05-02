@@ -49,21 +49,4 @@ problem pb(u,v,init=i,solver="Cholesky") =
     + on(gamma, u=U)
     + on(omega, u=0);
 
-// numerical result of (1)
-vh uh, vhT;
-problem internPoissonh(uh,vhT,solver=GMRES,tgv=1e5) = 
-    int2d(th)(dx(uh)*dx(vhT) + dy(uh)*dy(vhT)) 
-    - int2d(th)(vhT) 
-    + on(omega, uh = 0);
-
-internPoissonh;
-
-VH uH, vH;
-problem internPoissonH(uH,vH,solver=GMRES,tgv=1e5) = 
-    int2d(TH)(dx(uH)*dx(vH) + dy(uH)*dy(vH)) 
-    - int2d(TH)(vH) 
-    + on(omega, uH = 0);
-
-internPoissonH;
-
 
