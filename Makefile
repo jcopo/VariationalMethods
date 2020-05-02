@@ -14,3 +14,9 @@ errOverlapp: ./src/errOverlappPoisson.edp
 
 errNoOverlapp: ./src/errNoOverlappPoisson.edp
 	$(CC) $^
+
+clean:
+	rm -f ./output/data/*txt
+	rm -f ./output/graphics/schwarzOverlappPoisson/*eps
+	rm -f ./output/graphics/schwarzNoOverlappPoisson/*eps
+	rm -f ./output/graphics/internalapprox/*eps
