@@ -2,5 +2,5 @@ include "internalapprox.edp"
 
 // Representation graphique 
 internPoisson;
-plot(uh, ps="internPoisson.eps", fill=false, value=true, cmm="Solution Poisson internal approximation");
+plot(uh, ps="internPoisson.eps", fill=false, value=true, cmm="Solution Poisson internal approximation", wait=true);
 exec("mv *.eps ./output/graphics/internalapprox");

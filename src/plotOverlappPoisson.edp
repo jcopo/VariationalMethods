@@ -5,7 +5,7 @@ verbosity = 0;
 for (i = 0; i < 10; i++) {
     PB; 
     pb; 
-    plot(U, u, ps = "schwarzOverlappPoisson" + i + ".eps", cmm="Schwarz overlapping Poisson n=" + i);
+    plot(U, u, ps = "schwarzOverlappPoisson" + i + ".eps", cmm="Schwarz overlapping Poisson n=" + i, wait=true);
 }
 
 exec("mv *.eps ./output/graphics/schwarzOverlappPoisson/");
