@@ -1,86 +1,67 @@
-real a = 40, b = 40, c = 0.5;
-border a00(t=0, 1) {x=a*t; y=0; label=1;}
-border a10(t=0, 1) {x=a; y=b*t; label=1;}
-border a20(t=1, 0) {x=a*t; y=b; label=1;}
-border a30(t=1, 0) {x=0; y=b*t; label=1;}
-border a01(t=0, 1) {x=c+(a-c*2)*t; y=c; label=1;}
-border a11(t=0, 1) {x=a-c; y=c+(b-c*2)*t; label=1;}
-border a21(t=1, 0) {x=c+(a-c*2)*t; y=b-c; label=1;}
-border a31(t=1, 0) {x=c; y=c+(b-c*2)*t; label=1;}
+int n=5;
 
-real p = 5, q = 20, d = 34, e = 1;
-border b00(t=0, 1) {x=p+d*t; y=q; label=3;}
-border b10(t=0, 1) {x=p+d; y=q+e*t; label=3;}
-border b20(t=1, 0) {x=p+d*t; y=q+e; label=3;}
-border b30(t=1, 0) {x=p; y=q+e*t; label=3;}
+int wall = 5;
+int murExt=6;
+// definition des frontières du rectangle
+border abottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = 3;};//cote inferieur 
+border aright(t=-0.5,0.5) {x = 2; y = t; label = 3;};//cote droit 
+border atop(t=2,sqrt(3)*0.5) {x = t; y = 0.5; label = 3;};//cote superieur
 
-real r = 30, s =1 , j = 1, u = 15;
-border c00(t=0, 1) {x=r+j*t; y=s; label=3;}
-border c10(t=0, 1) {x=r+j; y=s+u*t; label=3;}
-border c20(t=1, 0) {x=r+j*t; y=s+u; label=3;}
-border c30(t=1, 0) {x=r; y=s+u*t; label=3;}
+border C(t=0, 2*pi){x=1.+0.05*cos(t); y=0.05*sin(t); label=1;}
 
-int n=3;
-mesh Sh = buildmesh(a00(10*n) + a10(10*n) + a20(10*n) + a30(10*n)
-    + a01(10*n) + a11(10*n) + a21(10*n) + a31(10*n)
-    + b00(5*n) + b10(5*n) + b20(5*n) + b30(5*n)
-    + c00(5*n) + c10(5*n) + c20(5*n) + c30(5*n));
-plot(Sh, wait=1);
-
-border C(t=0, 2*pi){x=2+cos(t); y=5+sin(t); label=2;}
-
-mesh Th = buildmesh(a00(10*n) + a10(10*n) + a20(10*n) + a30(10*n)
-    + a01(10*n) + a11(10*n) + a21(10*n) + a31(10*n) + C(10)
-    + b00(-5*n) + b10(-5*n) + b20(-5*n) + b30(-5*n)
-    + c00(-5*n) + c10(-5*n) + c20(-5*n) + c30(-5*n)
-    );
-mesh TH = buildmesh(b00(5*n) + b10(5*n) + b20(5*n) + b30(5*n)
-    + c00(5*n) + c10(5*n) + c20(5*n) + c30(5*n));
+// definition du cercle
+border circle(t=(pi/6),11*(pi/6)){x = cos(t); y = sin(t); label = 4;};
 
 
-fespace Vh(Th, P1);
-fespace VH(TH, P1);
 
-func real wall() {
-   if (Th(x,y).region == Th(0.5,0.5).region || Th(x,y).region == Th(7,20.5).region || Th(x,y).region == Th(30.5,2).region) { return 1; }
+
+// On ajoute des murs
+real r =1.17;
+border MurCircle(t=(pi/6),11*(pi/6)){x = r*cos(t); y = r*sin(t); label = murExt;};
+real ptx =r*cos(pi/6), pty=r*sin(11*pi/6), len=1.1;
+
+border Murbottom(t=0,len){x = ptx+t; y = pty ; label = 3;};//cote inferieur 
+border Murright(t=pty,-pty) {x = ptx+len; y = t; label = 3;};//cote droit 
+border Murtop(t=0,len) {x = len +ptx-t; y = -pty; label = 3;};//cote superieur
+plot(MurCircle(20) + Murbottom(10) + Murright(10) + Murtop(10), wait=true);
+
+//Obstacle intérieur
+real x1= sqrt(3)*0.5, y1=0.5, d=0.07, h=0.1;
+border c00(t=0, 1) {x=x1-d +2*d*t; y=-y1+h; label= wall;}
+border c10(t=0, 1) {x=x1+d; y= -y1+h +2*(y1-h)*t; label=wall;}
+border c20(t=0, 1) {x=x1+d -2*d*t; y=y1-h; label=wall;}
+border c30(t=0, 1) {x=x1-d; y=y1-h-2*(y1-h)*t; label=wall;}
+plot(c00(5) + c10(5) + c20(5) + c30(5));
+
+
+
+mesh Th = buildmesh(abottom(10*n) + aright(10*n) + atop(10*n) + circle(50*n) +C(20) + c00(20) + c10(20) + c20(20) + c30(20) 
+    + MurCircle(10*n) + Murbottom(20) + Murright(20) + Murtop(20) );
+plot(Th, wait=1);
+
+// Espace element fini p1
+fespace Vh(Th,P1);
+Vh<complex> v,w;
+func real InWall() {
+   if (Th(x,y).region == Th(x1, 0).region || Th(x,y).region == Th(ptx, pty-0.1).region) { return 1; }
    else { return 0; }
 }
 
-Vh<complex> v,w;
-Vh<complex> V, W;
-randinit(900);
+
+randinit(90);
 Vh wallreflexion = randreal1();
 Vh<complex> wallabsorption = randreal1()*0.5i;
-Vh k = 6;
-
-VH Wallreflexion = randreal1();
-VH<complex> Wallabsorption = randreal1()*0.5i;
-VH K = 6;
-/*
-cout << "Reflexion of walls : " << wallreflexion << "\n";
-cout << "Absorption of walls : " << wallabsorption << "\n";
-*/
+Vh k = 80;
+Vh t = InWall();
+plot(t, wait=1, value=1);
 problem muwave(v,w) =
     int2d(Th)(
-          (v*w*k^2)/(1+(wallreflexion+wallabsorption)*wall())^2
+        (v*w*k^2)/(1+(wallreflexion+wallabsorption)*InWall())^2
         - (dx(v)*dx(w)+dy(v)*dy(w))
     )
-    + on(2, v=1)
-    + on(3, v=V)
+    + on(1, v=1)
     ;
 
-problem WUVAVE(V,W) =
-    int2d(Th)(
-          (V*W*K^2)/(1+(Wallreflexion+Wallabsorption)*wall())^2
-        - (dx(V)*dx(W)+dy(V)*dy(W))
-    )
-    + on(3, V=v)
-    ;
-
-for (int i=0; i<100; i++){ 
 muwave;
-WUVAVE;
-VH VM = log(real(V)^2 + imag(V)^2);
-Vh vm = log(real(v)^2 + imag(v)^2);
-plot(vm, VM, wait=0, fill=true, value=0, nbiso=65);
-}
+Vh vm = real(v)^2 + imag(v)^2;
+plot(vm, wait=1, fill=true, value=0);
