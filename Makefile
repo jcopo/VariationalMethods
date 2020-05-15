@@ -14,6 +14,12 @@ errOverlapp: ./src/errOverlappPoisson.edp
 
 errNoOverlapp: ./src/errNoOverlappPoisson.edp
 	$(CC) $^
+	
+helmholtz: ./src/helmholtz.edp
+	$(CC) $^
+
+helmholtzOverlapp: ./src/helmholtzOverlap.edp
+	$(CC) $^
 
 helmholtz: ./src/helmholtz.edp
 	$(CC) $^
