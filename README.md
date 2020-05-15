@@ -15,7 +15,7 @@ To make it easier for you to correct our project, we have written a Makefile wit
 
 **make helmholtz** Plot the domain of helmholtz resolution
 
-**make helmholtzNOverlap** Plot the result of the third part of the project
+**make helmholtzNoOverlap** Plot the result of the third part of the project
 
 **make clean** Clean the postscript result in the output
 
