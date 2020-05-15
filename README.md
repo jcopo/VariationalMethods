@@ -13,6 +13,10 @@ To make it easier for you to correct our project, we have written a Makefile wit
 
 **make errNoOverlapp** Plot the error of the internal approximation with no overlapped decomposition 
 
+**make helmholtz** Plot the domain of helmholtz resolution
+
+**make helmholtzOverlapp** Plot the result of the third part of the project
+
 **make clean** Clean the postscript result in the output
 
 In the file $./script/ you will find a script to plot the error of the no overlapped decomposition of omega function of lambda. (The script is written in Python).
