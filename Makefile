@@ -15,6 +15,11 @@ errOverlapp: ./src/errOverlappPoisson.edp
 errNoOverlapp: ./src/errNoOverlappPoisson.edp
 	$(CC) $^
 
+helmholtz: ./src/helmholtz.edp
+	$(CC) $^
+
+helmholtzNoOverlap: ./src/helmholtzNoOverlap.edp
+	$(CC) $^
 clean:
 	rm -f ./output/data/*txt
 	rm -f ./output/graphics/schwarzOverlappPoisson/*eps

@@ -41,7 +41,7 @@ Vh k = 6;
 VH<complex> V, W;
 VH Wallreflexion = randreal1();
 VH<complex> Wallabsorption = randreal1()*0.5i;
-VH K = 6;
+VH K = 80;
 /*
 cout << "Reflexion of walls : " << wallreflexion << "\n";
 cout << "Absorption of walls : " << wallabsorption << "\n";
