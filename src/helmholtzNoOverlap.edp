@@ -1,0 +1,97 @@
+int n=5;
+int gamma = 7;
+int wall = 5;
+int murExt=6;
+// definition des frontières du rectangle
+border abottom(t=sqrt(3)*0.5,2){x = t; y = -0.5; label = gamma;};//cote inferieur 
+border aright(t=-0.5,0.5) {x = 2; y = t; label = gamma;};//cote droit 
+border atop(t=2,sqrt(3)*0.5) {x = t; y = 0.5; label = gamma;};//cote superieur
+
+border C(t=0, 2*pi){x=1.+0.05*cos(t); y=0.05*sin(t); label=4;}
+
+// definition du cercle
+border circle(t=(pi/6),11*(pi/6)){x = cos(t); y = sin(t); label = gamma;};
+
+// On ajoute des murs
+real r =1.17;
+border MurCircle(t=(pi/6),11*(pi/6)){x = r*cos(t); y = r*sin(t); label = murExt;};
+real ptx =r*cos(pi/6), pty=r*sin(11*pi/6), len=1.1;
+
+border Murbottom(t=0,len){x = ptx+t; y = pty ; label = 3;};//cote inferieur 
+border Murright(t=pty,-pty) {x = ptx+len; y = t; label = 3;};//cote droit 
+border Murtop(t=0,len) {x = len +ptx-t; y = -pty; label = 3;};//cote superieur
+plot(MurCircle(20) + Murbottom(10) + Murright(10) + Murtop(10), wait=true);
+
+//Obstacle intérieur
+real x1= sqrt(3)*0.5, y1=0.5, d=0.07, h=0.1;
+border c00(t=0, 1) {x=x1-d +2*d*t; y=-y1+h; label= gamma;}
+border c10(t=0, 1) {x=x1+d; y= -y1+h +2*(y1-h)*t; label=gamma;}
+border c20(t=0, 1) {x=x1+d -2*d*t; y=y1-h; label=gamma;}
+border c30(t=0, 1) {x=x1-d; y=y1-h-2*(y1-h)*t; label=gamma;}
+plot(c00(5) + c10(5) + c20(5) + c30(5));
+
+mesh Th = buildmesh(abottom(10*n) + aright(10*n) + atop(10*n) + circle(50*n)
+    +C(-20) + c00(-20) + c10(-20) + c20(-20) + c30(-20) 
+);
+
+mesh TH = buildmesh(C(20) + c00(20) + c10(20) + c20(20) + c30(20) 
+    + MurCircle(10*n) + Murbottom(20) + Murright(20) + Murtop(20)
+    +abottom(-10*n) + aright(-10*n) + atop(-10*n) + circle(-50*n) );
+plot(Th, wait=1);
+plot(TH, wait=1);
+
+// Espace element fini p1
+fespace Vh(Th,P1);
+fespace VH(TH, P1);
+
+VH<complex> V,W;
+func real InWall() {
+   if (Th(x,y).region == Th(x1, 0).region || Th(x,y).region == Th(ptx, pty-0.1).region) { return 1; }
+   else { return 0; }
+}
+Vh<complex> v, w;
+
+randinit(90);
+real ref = randreal1(), abso=randreal1();
+VH wallreflexion = ref;
+VH<complex> wallabsorption = abso*0.5i;
+VH k = 80;
+complex lambda = 1i*80/(ref+abso*0.5i);
+
+complex lambdap = 1i*80;
+
+
+int i=0;
+
+problem MUWAVE(V,W, init=i,solver="Cholesky") =
+    int2d(TH)(
+        (V*W*k^2)/(1+(wallreflexion+wallabsorption)*InWall())^2
+        - (dx(V)*dx(W)+dy(V)*dy(W))
+    )
+    + int1d(TH, 4)(lambda*V*W)
+    + int1d(TH, gamma)(lambda*V*W)
+    - int1d(TH, 4)((N.x*dx(v) + N.y*dy(v) + lambda*v)*W)
+    - int1d(TH, gamma)((N.x*dx(v) + N.y*dy(v) + lambda*v)*W)
+    + on(4, V=1)
+    ;
+
+problem muwave(v,w, init=i,solver="Cholesky") =
+    int2d(Th)(
+        (v*w*k^2) //n=1 dans l'air 
+        - (dx(v)*dx(w)+dy(v)*dy(w))
+    )
+    + int1d(Th, gamma, 4)(lambda*v*w)
+    - int1d(Th, gamma, 4)((N.x*dx(V) + N.y*dy(V) + lambdap*V)*w)
+    + on(4, v=1);
+    ;
+
+Vh vm;
+VH VM;
+
+for (int i=0; i<50; i++){ 
+muwave;
+MUWAVE;
+VH VM = log(real(V)^2 + imag(V)^2);
+Vh vm = log(real(v)^2 + imag(v)^2);
+plot(vm, VM, wait=0, fill=true, value=0, nbiso=65);
+}
